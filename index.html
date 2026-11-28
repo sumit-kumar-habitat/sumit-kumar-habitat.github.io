@@ -764,6 +764,150 @@
     }
   </script>
         <!-- ==================== 8. INTERACTIVE JAVASCRIPT END ==================== -->
+<!-- Blurred Full-Screen Carousel Modal -->
+        <div id="crudCarouselModal"
+            style="display: none; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);"
+            class="fixed inset-0 z-50 bg-slate-950/75 items-center justify-center p-4 sm:p-6">
+            <div id="crudCarouselBox"
+                class="relative w-full max-w-4xl bg-slate-900/95 border border-slate-700/80 rounded-2xl shadow-2xl overflow-hidden">
 
+                <!-- Top Bar -->
+                <div
+                    class="flex items-center justify-between px-5 py-3.5 border-b border-slate-800">
+                    <div>
+                        <span id="crudSlideTitle"
+                            class="text-sm font-medium text-white">User
+                            Management (CRUD)</span>
+                        <span id="crudSlideCounter"
+                            class="ml-2 text-xs text-slate-400">1 / 4</span>
+                    </div>
+                    <button id="crudCloseBtn" type="button"
+                        class="px-2.5 py-1 rounded-lg text-xs text-slate-300 hover:text-white hover:bg-slate-800 transition">
+                        Close ✕
+                    </button>
+                </div>
+
+                <!-- Main Image + Left/Right Arrows -->
+                <div
+                    class="relative bg-slate-950 flex items-center justify-center min-h-[260px] sm:min-h-[420px] p-4">
+                    <button id="crudPrevBtn" type="button"
+                        aria-label="Previous screenshot"
+                        class="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-slate-900/90 hover:bg-indigo-600 text-white border border-slate-700 flex items-center justify-center transition">
+                        ←
+                    </button>
+
+                    <img id="crudCarouselImg"
+                        src="image/User-Management.JPG"
+                        alt="User Management CRUD Screenshot"
+                        class="max-h-[70vh] w-auto max-w-full object-contain rounded-lg" />
+
+                    <button id="crudNextBtn" type="button"
+                        aria-label="Next screenshot"
+                        class="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-slate-900/90 hover:bg-indigo-600 text-white border border-slate-700 flex items-center justify-center transition">
+                        →
+                    </button>
+                </div>
+
+                <!-- Bottom Dots -->
+                <div id="crudDots"
+                    class="flex items-center justify-center gap-2 py-3.5 border-t border-slate-800 bg-slate-900">
+                    <button type="button" data-dot="0"
+                        class="w-2.5 h-2.5 rounded-full bg-indigo-400 transition"></button>
+                    <button type="button" data-dot="1"
+                        class="w-2.5 h-2.5 rounded-full bg-slate-600 hover:bg-slate-500 transition"></button>
+                    <button type="button" data-dot="2"
+                        class="w-2.5 h-2.5 rounded-full bg-slate-600 hover:bg-slate-500 transition"></button>
+                    <button type="button" data-dot="3"
+                        class="w-2.5 h-2.5 rounded-full bg-slate-600 hover:bg-slate-500 transition"></button>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const slides = [
+                    { src: "image/User-Management.JPG", title: "User Management (CRUD)" },
+                    { src: "image/Login-Page.JPG", title: "Login Page" },
+                    { src: "image/Dashboard.JPG", title: "Dashboard Overview" },
+                    { src: "image/Announcement-Page.JPG", title: "Announcement Page" }
+                ];
+
+                let activeIndex = 0;
+                const modal = document.getElementById("crudCarouselModal");
+                const modalBox = document.getElementById("crudCarouselBox");
+                const imgEl = document.getElementById("crudCarouselImg");
+                const titleEl = document.getElementById("crudSlideTitle");
+                const counterEl = document.getElementById("crudSlideCounter");
+                const dots = Array.from(document.querySelectorAll("#crudDots [data-dot]"));
+
+                function renderSlide(index) {
+                    activeIndex = (index + slides.length) % slides.length;
+                    const current = slides[activeIndex];
+                    imgEl.src = current.src;
+                    imgEl.alt = current.title;
+                    titleEl.textContent = current.title;
+                    counterEl.textContent = (activeIndex + 1) + " / " + slides.length;
+
+                    dots.forEach(function (dot, i) {
+                        dot.className = i === activeIndex
+                            ? "w-2.5 h-2.5 rounded-full bg-indigo-400 transition"
+                            : "w-2.5 h-2.5 rounded-full bg-slate-600 hover:bg-slate-500 transition";
+                    });
+                }
+
+                function openCarousel(index) {
+                    renderSlide(index);
+                    modal.style.display = "flex";
+                    document.body.style.overflow = "hidden";
+                }
+
+                function closeCarousel() {
+                    modal.style.display = "none";
+                    document.body.style.overflow = "";
+                }
+
+                document.querySelectorAll("[data-open-slide]").forEach(function (trigger) {
+                    trigger.addEventListener("click", function (e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const idx = parseInt(trigger.getAttribute("data-open-slide"), 10) || 0;
+                        openCarousel(idx);
+                    });
+                });
+
+                document.getElementById("crudPrevBtn").addEventListener("click", function (e) {
+                    e.stopPropagation();
+                    renderSlide(activeIndex - 1);
+                });
+
+                document.getElementById("crudNextBtn").addEventListener("click", function (e) {
+                    e.stopPropagation();
+                    renderSlide(activeIndex + 1);
+                });
+
+                dots.forEach(function (dot) {
+                    dot.addEventListener("click", function (e) {
+                        e.stopPropagation();
+                        const idx = parseInt(dot.getAttribute("data-dot"), 10) || 0;
+                        renderSlide(idx);
+                    });
+                });
+
+                document.getElementById("crudCloseBtn").addEventListener("click", closeCarousel);
+
+                modal.addEventListener("click", function (e) {
+                    if (!modalBox.contains(e.target)) {
+                        closeCarousel();
+                    }
+                });
+
+                document.addEventListener("keydown", function (e) {
+                    if (modal.style.display === "none") return;
+                    if (e.key === "Escape") closeCarousel();
+                    if (e.key === "ArrowLeft") renderSlide(activeIndex - 1);
+                    if (e.key === "ArrowRight") renderSlide(activeIndex + 1);
+                });
+            });
+        </script>
     </body>
 </html>
